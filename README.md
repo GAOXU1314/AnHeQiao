@@ -1,2 +1,536 @@
-# AnHeQiao
-恐怖游戏论坛
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>安河桥 · 半夜不要回头</title>
+  <style>
+    /* 整体阴森氛围 */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background: #0b0d0e;
+      font-family: 'Courier New', Courier, monospace;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+      color: #b0b9c0;
+    }
+    .forum-container {
+      max-width: 820px;
+      width: 100%;
+      background: #121619;
+      border: 2px solid #3a2a1e;
+      box-shadow: 0 0 30px rgba(180, 70, 40, 0.3), inset 0 0 20px rgba(0, 0, 0, 0.8);
+      border-radius: 8px;
+      padding: 1.5rem 1.8rem;
+      position: relative;
+      transition: all 0.2s;
+    }
+    /* 血迹装饰 */
+    .forum-container::before {
+      content: '';
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      width: 80px;
+      height: 80px;
+      background: radial-gradient(circle, #5e1e1e 0%, transparent 70%);
+      opacity: 0.3;
+      border-radius: 50%;
+      filter: blur(8px);
+      pointer-events: none;
+    }
+    h1 {
+      font-size: 2.2rem;
+      text-align: center;
+      letter-spacing: 4px;
+      color: #a8462a;
+      text-shadow: 0 0 8px #4a0e0e, 0 0 2px #ff6a4d;
+      border-bottom: 1px dashed #4a3a2a;
+      padding-bottom: 0.5rem;
+      margin-bottom: 0.5rem;
+      font-weight: 400;
+      text-transform: uppercase;
+      word-break: break-word;
+    }
+    .subhead {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #5f6b6e;
+      margin-bottom: 1.8rem;
+      letter-spacing: 2px;
+      border-bottom: 1px solid #2a2e30;
+      padding-bottom: 0.6rem;
+    }
+    /* 帖子列表 */
+    .post-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin: 2rem 0 1.5rem;
+    }
+    .post {
+      background: #0e1215;
+      border-left: 5px solid #3e2c1e;
+      border-bottom: 1px solid #2a312e;
+      padding: 1rem 1.4rem;
+      border-radius: 0 12px 12px 0;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+      position: relative;
+    }
+    .post:hover {
+      background: #1b2228;
+      border-left-color: #a8462a;
+      box-shadow: 0 0 12px rgba(200, 70, 30, 0.4);
+      transform: scale(1.01);
+    }
+    .post-title {
+      font-size: 1.25rem;
+      font-weight: bold;
+      color: #b89b8a;
+      margin-bottom: 0.3rem;
+      letter-spacing: 0.5px;
+    }
+    .post-meta {
+      font-size: 0.7rem;
+      color: #5b6a6e;
+      display: flex;
+      gap: 1rem;
+    }
+    .post-meta .author {
+      color: #8f6e5c;
+    }
+    /* 当前故事展示区 */
+    .story-panel {
+      background: #0b0e10;
+      border: 1px solid #2a3a3a;
+      border-radius: 6px;
+      padding: 1.6rem 1.8rem;
+      margin: 2rem 0 1.8rem;
+      min-height: 190px;
+      box-shadow: inset 0 0 25px #00000088;
+      transition: background 0.3s;
+      position: relative;
+    }
+    .story-panel .story-title {
+      color: #c9845e;
+      font-size: 1.4rem;
+      border-left: 4px solid #8b3f2a;
+      padding-left: 0.8rem;
+      margin-bottom: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 1px;
+    }
+    .story-panel .story-content {
+      color: #b0b8b8;
+      line-height: 1.6;
+      font-size: 1rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+      text-shadow: 0 0 1px #000;
+    }
+    .story-panel .story-content.glitch {
+      animation: textGlitch 0.3s infinite alternate;
+    }
+    @keyframes textGlitch {
+      0% { color: #b0b8b8; text-shadow: 2px 0 #3a1e1e, -2px 0 #1e2e3a; }
+      50% { color: #c9a88a; text-shadow: -2px 1px #2a1a1a, 2px -1px #1a2a2a; }
+      100% { color: #b0b8b8; text-shadow: 2px 0 #3a1e1e, -2px 0 #1e2e3a; }
+    }
+    /* 控制区域 */
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 1.8rem;
+      border-top: 1px dashed #2c3a38;
+      padding-top: 1.5rem;
+    }
+    button {
+      background: #1a1f22;
+      border: 1px solid #504236;
+      color: #c7b7aa;
+      font-family: 'Courier New', monospace;
+      padding: 0.7rem 1.4rem;
+      font-size: 0.95rem;
+      letter-spacing: 1px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.15s;
+      text-transform: uppercase;
+      font-weight: 600;
+      box-shadow: 0 2px 0 #0a0c0e;
+      flex: 0 1 auto;
+    }
+    button:hover {
+      background: #2d2822;
+      border-color: #a8462a;
+      color: #e6d6c0;
+      box-shadow: 0 0 12px #8b3f2a55;
+    }
+    button:active {
+      transform: translateY(2px);
+      box-shadow: none;
+    }
+    .reset-btn {
+      border-color: #5a3e3e;
+      color: #b87a6a;
+    }
+    /* 隐藏信息 */
+    .hidden-note {
+      font-size: 0.65rem;
+      color: #3d484b;
+      text-align: right;
+      margin-top: 1rem;
+      border-top: 1px solid #1f2629;
+      padding-top: 0.7rem;
+      font-style: italic;
+    }
+    .flicker {
+      animation: flickerAnim 3s infinite;
+    }
+    @keyframes flickerAnim {
+      0%, 100% { opacity: 1; }
+      92% { opacity: 1; }
+      93% { opacity: 0.3; }
+      94% { opacity: 1; }
+      96% { opacity: 0.5; }
+      97% { opacity: 1; }
+    }
+    .corpse-mark {
+      position: absolute;
+      bottom: 10px;
+      right: 15px;
+      font-size: 1.8rem;
+      opacity: 0.15;
+      transform: rotate(15deg);
+      user-select: none;
+      pointer-events: none;
+    }
+    /* 滚动条 */
+    ::-webkit-scrollbar {
+      width: 8px;
+      background: #0b0d0e;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #3a2a1e;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+<div class="forum-container flicker" id="forumContainer">
+  <h1>夜语者论坛</h1>
+  <div class="subhead">» 匿名版 · 仅限幸存者访问 «</div>
+
+  <!-- 帖子列表 (点击切换故事) -->
+  <div class="post-list" id="postList">
+    <!-- 通过JS动态渲染，便于维护 -->
+  </div>
+
+  <!-- 故事展示区 -->
+  <div class="story-panel" id="storyPanel">
+    <div class="story-title" id="storyTitle">欢迎来到夜语者</div>
+    <div class="story-content" id="storyContent">
+      点击任意帖子，开始阅读… 但请小心，有些故事会自己延续。
+    </div>
+  </div>
+
+  <!-- 按钮区 -->
+  <div class="controls">
+    <button id="nextBtn">下一段故事</button>
+    <button id="resetBtn" class="reset-btn">重置论坛</button>
+  </div>
+  <div class="hidden-note">⚠️ 不要相信最后一条帖子</div>
+  <div class="corpse-mark">☠️</div>
+</div>
+
+<script>
+  // ---------- 恐怖论坛核心数据 ----------
+  // 每个帖子是一个故事路径，包含标题、作者、多段文本、以及一些状态效果
+  const posts = [
+    {
+      id: 0,
+      title: '我的邻居好像不是人',
+      author: '匿名用户 03:14',
+      story: [
+        '我搬进新公寓的第一晚，听见墙壁里传来指甲刮擦的声音。',
+        '我敲了敲隔壁的门，一个苍白的女人透过门缝说：“这里只有你一个人住，先生。”',
+        '可我明明看见她身后站着一个穿红睡衣的小女孩，对我招手。',
+        '第二天，物业告诉我：那间房三年前就封死了，因为租客一家三口……失踪了。',
+        '墙壁里的抓挠声，现在变成了我的名字。'
+      ]
+    },
+    {
+      id: 1,
+      title: '千万别在午夜登录这个论坛',
+      author: '已注销',
+      story: [
+        '我是论坛的老用户，但从来没发过帖。',
+        '昨晚我收到一条私信：“你看过自己的在线时间吗？”',
+        '我瞥了一眼——在线时长：666小时66分66秒。',
+        '可我注册才三天。',
+        '然后屏幕自己打出一行字：“现在你也是我们的一员了。”',
+        '我转过头，身后的椅子上坐着一个和我一模一样的人。'
+      ]
+    },
+    {
+      id: 2,
+      title: '医院值班记录：太平间多了一具尸体',
+      author: '夜班护士 L',
+      story: [
+        '凌晨3点，太平间的自动门开了。',
+        '监控里，一个穿病号服的人自己走了进去，躺在了空床上。',
+        '我壮着胆子去查看，那里只有一具冰冷的尸体，脸上盖着白布。',
+        '我掀开白布——是我自己的脸。',
+        '我尖叫着跑回值班室，电话响了：“你忘记关冰柜了，护士。”',
+        '现在，我正躺在那个冰柜里，看着你读这段话。'
+      ]
+    },
+    {
+      id: 3,
+      title: '有人听过“它”的声音吗？',
+      author: '最后的幸存者',
+      story: [
+        '我在森林里录到一段声音，播放时会让人产生幻觉。',
+        '我把它上传到论坛，但所有下载过的人……都消失了。',
+        '现在你正在阅读这个帖子，说明你也听见了。',
+        '它在你的背后，轻轻地呼吸。',
+        '不要回头。',
+        '因为回头的人，再也无法打字了。'
+      ]
+    }
+  ];
+
+  // 每个帖子对应的“后续”恐怖文本，用于下一段按钮（渐进式恐怖）
+  const extraSegments = [
+    // 帖子0 后续段落
+    [
+      '我试图用胶带封住墙壁，但胶带下渗出暗红色的液体。',
+      '邻居们开始每天在我门口放一只死老鼠，排列成箭头指向我的卧室。',
+      '昨晚我梦见自己变成了墙壁里的声音，而那个小女孩正睡在我的床上。',
+      '今天，公寓管理员递给我一张纸条：“下一位租客即将入住，请保持安静。”'
+    ],
+    // 帖子1 后续
+    [
+      '我尝试关机，但屏幕却开始倒数：10、9、8……',
+      '每个数字响起时，房间里就多出一个黑影。',
+      '当数到1，所有黑影同时睁开了眼睛，而我的倒影在屏幕里笑了。',
+      '我砸碎了显示器，碎片中映出无数个“我”，都张着嘴说：“欢迎回来。”'
+    ],
+    // 帖子2 后续
+    [
+      '我挣扎着想推开冰柜的门，但外面传来另一个我的声音：“别出来，会吓到别人的。”',
+      '我透过缝隙看见，那个“我”正穿着我的护士服，给病人发药。',
+      '病人接过药片，对我藏身的方向眨了眨眼。',
+      '药瓶标签写着：“给下一具尸体。”'
+    ],
+    // 帖子3 后续
+    [
+      '我戴上了耳机，决定再听一次那段声音。',
+      '这次我听到的，是论坛里所有用户的尖叫声，混合着我的名字。',
+      '屏幕上自动弹出一个新帖子：“下一个就是你。”',
+      '发帖人ID：你的真实姓名。'
+    ]
+  ];
+
+  // 当前激活的帖子索引
+  let currentPostIndex = 0;      // 默认显示第0个帖子
+  let currentSegmentIndex = 0;   // 当前帖子内显示到第几段（默认显示完整个故事）
+
+  // DOM元素
+  const postListEl = document.getElementById('postList');
+  const storyTitleEl = document.getElementById('storyTitle');
+  const storyContentEl = document.getElementById('storyContent');
+  const nextBtn = document.getElementById('nextBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const forumContainer = document.getElementById('forumContainer');
+
+  // ---------- 渲染帖子列表 ----------
+  function renderPostList() {
+    postListEl.innerHTML = '';
+    posts.forEach((post, index) => {
+      const postEl = document.createElement('div');
+      postEl.className = 'post';
+      postEl.dataset.index = index;
+      postEl.innerHTML = `
+        <div class="post-title">${post.title}</div>
+        <div class="post-meta">
+          <span class="author">${post.author}</span>
+          <span>👁️ 点击阅读</span>
+        </div>
+      `;
+      postEl.addEventListener('click', () => selectPost(index));
+      postListEl.appendChild(postEl);
+    });
+  }
+
+  // ---------- 更新故事面板（根据当前帖子索引和段落索引）----------
+  function updateStoryPanel(showFullStory = false) {
+    const post = posts[currentPostIndex];
+    if (!post) return;
+
+    // 标题
+    storyTitleEl.textContent = post.title;
+
+    // 决定展示的内容
+    let segments = [...post.story]; // 基础故事
+    
+    // 如果当前激活的帖子有扩展恐怖段落，并且用户点击过“下一段”，则追加额外内容
+    // 这里根据 currentSegmentIndex 混合展示。为逻辑简单：展示基础故事 + 已解锁的额外段落
+    // 我们使用 currentSegmentIndex 表示用户已经点击了多少次“下一段”按钮（针对当前帖子）
+    // 但为了不丢失状态，在切换帖子时重置 currentSegmentIndex 为 0
+    // 注意：默认显示完整基础故事，所以不额外追加（但也可以显示基础+额外，取决于设计）
+    // 为了更恐怖，这里默认显示完整基础故事，并且可以通过下一段逐步加载额外内容。
+    
+    // 但我们希望基础故事完整显示，而额外段落则通过“下一段”逐步添加。
+    // 因此展示 = 基础故事 + extraSegments 中前 currentSegmentIndex 个段落(每个额外段落是一个字符串)
+    let extra = extraSegments[currentPostIndex] || [];
+    let extraToShow = extra.slice(0, currentSegmentIndex);
+    
+    // 合并所有文本
+    let allText = [...post.story, ...extraToShow].join('\n\n');
+    
+    // 如果 currentSegmentIndex 大于 extra 长度，表示所有额外段落已展示完，此时可以显示一些“最终警告”
+    const totalExtra = extra.length;
+    if (currentSegmentIndex >= totalExtra && totalExtra > 0) {
+      // 所有额外段落已显示，添加一句瘆人的话
+      allText += '\n\n……已经没有更多故事了，但“它”还在看着你。';
+    }
+
+    storyContentEl.textContent = allText;
+
+    // 添加一些闪烁/glitch效果 根据帖子索引和段落索引
+    if (currentSegmentIndex > 0 || currentPostIndex === 3) {
+      storyContentEl.classList.add('glitch');
+    } else {
+      storyContentEl.classList.remove('glitch');
+    }
+
+    // 根据当前恐怖程度改变容器的光晕（娱乐效果）
+    if (currentSegmentIndex > 1) {
+      forumContainer.style.boxShadow = '0 0 40px rgba(200, 20, 20, 0.6), inset 0 0 30px #3a0000';
+    } else {
+      forumContainer.style.boxShadow = '0 0 30px rgba(180, 70, 40, 0.3), inset 0 0 20px rgba(0, 0, 0, 0.8)';
+    }
+  }
+
+  // ---------- 选择帖子 ----------
+  function selectPost(index) {
+    if (index < 0 || index >= posts.length) return;
+    currentPostIndex = index;
+    currentSegmentIndex = 0;   // 重置额外段落进度
+    updateStoryPanel();
+    
+    // 点击帖子时，微小震动感（视觉）
+    forumContainer.style.transform = 'translateX(2px)';
+    setTimeout(() => forumContainer.style.transform = '', 100);
+  }
+
+  // ---------- 下一段故事（追加恐怖内容）----------
+  function nextSegment() {
+    const extra = extraSegments[currentPostIndex] || [];
+    const totalExtra = extra.length;
+
+    if (currentSegmentIndex < totalExtra) {
+      // 增加额外段落的展示数量
+      currentSegmentIndex++;
+      updateStoryPanel();
+      
+      // 如果已经展示完所有额外段落，改变按钮文字警示
+      if (currentSegmentIndex === totalExtra) {
+        nextBtn.textContent = '没有更多了… 快逃！';
+        nextBtn.style.color = '#b84a2a';
+        nextBtn.style.borderColor = '#8b3f2a';
+      } else {
+        nextBtn.textContent = '下一段故事';
+        nextBtn.style.color = '';
+        nextBtn.style.borderColor = '';
+      }
+    } else {
+      // 如果已经没有额外段落，但用户还点，做一个恐怖反馈：随机显示一个不可名状的消息
+      // 并且轻微晃动面板
+      const spookyMessages = [
+        '你听到身后有呼吸声…',
+        '屏幕上的文字开始流血…',
+        '有人在敲你的门。',
+        '它说：不要停。',
+        '你的名字出现在论坛成员列表里。',
+        '快回头看。'
+      ];
+      const randomMsg = spookyMessages[Math.floor(Math.random() * spookyMessages.length)];
+      storyContentEl.textContent += '\n\n' + randomMsg;
+      
+      // 视觉震动
+      forumContainer.style.transform = 'translate(3px, -2px)';
+      setTimeout(() => forumContainer.style.transform = '', 150);
+      
+      // 闪烁
+      storyContentEl.classList.add('glitch');
+      setTimeout(() => {
+        if (currentSegmentIndex === 0) storyContentEl.classList.remove('glitch');
+      }, 400);
+    }
+  }
+
+  // ---------- 重置论坛 ----------
+  function resetForum() {
+    currentPostIndex = 0;
+    currentSegmentIndex = 0;
+    nextBtn.textContent = '下一段故事';
+    nextBtn.style.color = '';
+    nextBtn.style.borderColor = '';
+    storyContentEl.classList.remove('glitch');
+    updateStoryPanel();
+    forumContainer.style.boxShadow = '0 0 30px rgba(180, 70, 40, 0.3), inset 0 0 20px rgba(0, 0, 0, 0.8)';
+    forumContainer.style.transform = '';
+    
+    // 重置按钮文字
+    // 顺便让故事面板闪烁一下
+    storyContentEl.textContent = '论坛已重置。但有些东西永远不会消失……';
+    storyTitleEl.textContent = '欢迎回来';
+    setTimeout(() => {
+      updateStoryPanel();
+    }, 1000);
+  }
+
+  // ---------- 初始化事件绑定 ----------
+  function init() {
+    renderPostList();
+    
+    // 默认显示第一个帖子的内容
+    currentPostIndex = 0;
+    currentSegmentIndex = 0;
+    updateStoryPanel();
+
+    // 绑定下一段事件
+    nextBtn.addEventListener('click', nextSegment);
+    
+    // 重置事件
+    resetBtn.addEventListener('click', resetForum);
+
+    // 添加一些额外的恐怖效果：鼠标移动时轻微变化（可选）
+    document.addEventListener('mousemove', (e) => {
+      // 根据鼠标位置轻微改变阴影方向，增加诡异感
+      const x = (e.clientX / window.innerWidth - 0.5) * 6;
+      const y = (e.clientY / window.innerHeight - 0.5) * 6;
+      if (currentSegmentIndex > 0) {
+        forumContainer.style.boxShadow = `${x}px ${y}px 30px rgba(200, 30, 30, 0.5), inset 0 0 25px #3a0000`;
+      }
+    });
+  }
+
+  // 启动一切
+  init();
+</script>
+</body>
+</html>
